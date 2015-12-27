@@ -28,31 +28,31 @@ class HTML_tool:
 class Lianzai_crawler:
 	"""docstring for Lianzai_cramlwr"""
 	def __init__(self, url):
-		self.myUrl = url + "?seelz=1"
+		self.myUrl = url + '?see_lz=1'
 		self.datas = []
 		self.myTool = HTML_tool()
 		print u'开始爬了咔嚓咔嚓'
 
 	def Tb_crawler(self):
-		user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) '
+		# user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) '
 		
-		header = {'User-Agent' : user_agent}
+		# header = {'User-Agent' : user_agent}
 
-		req = urllib2.Request(self.myUrl, headers = header)
+		# req = urllib2.Request(self.myUrl, headers = header)
 		
-		myPage = urllib2.urlopen(req).read()
+		# myPage = urllib2.urlopen(req).read()
+		myPage = urllib2.urlopen(self.myUrl).read().decode("utf-8")
 
-		endPage = self.Page_Counter(myPage.decode("utf-8"))
+		endPage = self.Page_Counter(myPage)
 
 		title = self.Find_Title(myPage)
-
 		print title
 
 		self.save_data(self.myUrl, title, endPage)
 
 
 	def Page_Counter(self, myPage):
-		match = re.search(r'class="red">(\d+?)</span>', myPage, re.S)
+		match = re.search(r'<span class="red">(\d+?)</span>', myPage, re.S)
 		if match:
 			endPage = int(match.group(1))
 			#print '共有' + endPage + '页内容'
@@ -87,10 +87,11 @@ class Lianzai_crawler:
 	
 
 	def get_data(self, url, endPage):
-		url = url + '&pn ='
+		url = url + '&pn='
 		for i in range(1, endPage + 1):
 			print u'爬虫%d正在加载中咔嚓咔嚓....' % i
 			myPage = urllib2.urlopen(url + str(i)).read() 
+			
 			self.deal_data(myPage.decode('utf-8')) 
 
 

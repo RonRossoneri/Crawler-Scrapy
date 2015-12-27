@@ -7,11 +7,34 @@ import thread
 import time
 
 
+class HTML_Tool(object):
+	"""docstring for HTML_Tool"""
+	BgnCharToNoneRex = re.compile("(\t|\n| |<a.*?>|<img.*?>)")
+	EndCharToNoneRex = re.compile("<.*?>")
+	BgnPartRex = re.compile("<p.*?>")
+	CharToNewLineRex = re.compile("(<br/>|</p>|<tr>|<div>|</div>)")
+	CharToNextTabRex = re.compile("<td>")
+	
+	replaceTab = [("&lt;","<"),("&gt;",">"),("&amp;","&"),("&amp;","\""),("&nbsp;"," ")]
+
+	def replaceChar(self, x):
+		x = self.BgnCharToNoneRex.sub("",x)
+		x = self.BgnPartRex.sub("\n    ",x)
+		x = self.CharToNewLineRex.sub("\n",x)
+		x = self.CharToNextTabRex.sub("\t",x)
+		x = self.EndCharToNoneRex.sub("",x)
+
+		for t in self.replaceTab:
+			x = x.replace(t[0], t[1])
+		return x
+		
+
 class Spider:
 	
     def __init__(self):
 		self.page = 1  # page是一个指数
 		self.pages = []  #pages 是存页码的一个list
+		self.myTool = HTML_Tool()
 		self.enable = False
 
 
@@ -20,13 +43,13 @@ class Spider:
 		myurl = "http://m.qiushibaike.com/hot/page/" + page
 
 		# here I change the header to Mac OSX
-		user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) '
+		user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1)'
 		header = {'User-Agent' : user_agent}
 		req = urllib2.Request(myurl, headers = header)
 		Myrespone = urllib2.urlopen(req)
 		Mypage = Myrespone.read()
 		if Mypage:
-			print '拿到了咩拿到了咩 ？'
+			print '拿到最初的pageeeeeeee啦~~'
 
 		#把这些拿到的数据变成utf8code
 		Mycode = Mypage.decode("utf-8")
@@ -35,7 +58,7 @@ class Spider:
 		# similar to the java replaceAll, but with more functionality
 
 		items = []
-		print '应该拿到了应该拿到了' 
+		print '处理标题和内容' 
 		for item in myItem:
 			# 
 			items.append([item[0].replace("\n",""), item[1].replace("\n","")])
@@ -55,17 +78,17 @@ class Spider:
 					self.pages.append(Mypage)
 				except Exception, e:
 					print "无法链接糗事百科"
-			# else:
-			# 	print "要睡啦要睡啦~"
-			# 	time.sleep(10)
+
 			else:
-				break
+				print "要睡啦要睡啦~"
+				time.sleep(1)
 
     
-    def showPage(self, nowPage, page):
-        
-		for items in nowPage:
-		    print u'第%d页' % page , items[0]  , items[1]
+    def showPage(self, q, page):
+
+		for items in q:
+		    print u'第%d页' % page, items[0]
+		    print self.myTool.replaceChar(items[1])
 		    myInput = raw_input()
 		    if myInput == 'quit':
 			    self.enable = False
@@ -78,18 +101,10 @@ class Spider:
 
 		print '正在加载中请稍后·····'
 
-
-		# try:
-		# 	print "here loading the page"
-		# 	thread.start_new_thread(self.LoadPage())
-		# 	print '会到这里咩会到这里咩1？'
-		# except Exception, e:
-		# 	print "cant new a thread"
+		thread.start_new_thread(self.LoadPage())
 
 		
 		while self.enable:
-			self.LoadPage()
-			print 'load 完了要回来了咩~'
 			if self.pages:
 				nowPage = self.pages[0]
 				del self.pages[0]
