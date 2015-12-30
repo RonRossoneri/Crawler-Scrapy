@@ -40,34 +40,21 @@ class Spider:
     	if not myPage:
     		print "页面加载失败····"
     		return None
-    	#patten = re.compile('<div.*?author">.*?<a.*?<img.*?>(.*?)</a>.*?<div.*?content">(.*?)<!--(.*?)-->.*?</div>(.*?)<div class="stats.*?class="number">(.*?)</i>',re.S)
-    	#patten = re.compile('<div class="content">(.*?)<!--(.*?)-->.*?</div>', re.S)
-    	patten = re.compile('<div class="author clearfix">.*?<a href=".*?" target=".*?" title="(.*?)"><h2>.*?</h2></a></div>', re.S)
-    						
+    	patten = re.compile('<h2>(.*?)</h2>.*?<div class="content">(.*?)<!--.*?-->.*?</div>.*?<span class="stats-vote"><i class="number">(.*?)</i>.*?<i class="number">(.*?)</i>',re.S)
+    	# item[0] 作者， item[1] 内容，item[2] 赞， item[3] 评论				
 
     	items = re.findall(patten, myPage)
-    	#这个search这里有问题·东西是空的
-    	if items:
-    		print 'sth in the items'
-    	else:
-    		print 'nothing in the items' 
     	
     	pageStory = []
-
-    	for item in items:
-    		print item[0], item[1]
-
     	# for item in items:
     	# 	print item[0], item[1], item[2], item[3], item[4]
     	
-    	# for item in items:
+    	for item in items:
+    		replaceBr = re.compile('<br/>')
+    		text = re.sub(replaceBr,"\n",item[1])
 
-    	# 	haveImg = re.search('<img>', item[3])
-    	# 	if not haveImg:
-    	# 		print "loading"
-    	# 		replaceBr = re.compile('<br/>')
-    	# 		text = re.sub(replaceBR,"\n",item[1])
-    	# 		pageStory.append(item[0].strip(), text.strip(), item[2].strip(), item[4].strip)
+    		pageStory.append(item)
+    	
     	print "successfully get the page"
     	return pageStory
 
@@ -79,21 +66,23 @@ class Spider:
 				print"获取新页面中·····"
 				#获取新页面
 				Mypage = self.getPageItems(str(self.page))
-				print Mypage
 				if Mypage:
 					self.stories.append(Mypage)
 					self.page += 1
-		print 'end of LoadPage'
 				
     
     def getOneStory(self, pageStory, page):
     	for story in pageStory:
-    		input = raw_input()
-    		self.LoadPage()
-    		if input == 'Q':
-    			self.enable = False
-    			return
-    		print u"第%d页\t发布人:%s\t发布时间:%s\t赞:%s\n%s" %(page,story[0],story[2],story[3],story[1])
+            #等待用户输入
+            input = raw_input()
+            #每当输入回车一次，判断一下是否要加载新页面
+            self.LoadPage()
+            #如果输入Q则程序结束
+            if input == "Q":
+                self.enable = False
+                return
+            print u"第%d页\t发布人:%s\t评论数:%s\t赞:%s\n%s" %(page,story[0],story[2],story[3],story[1])
+    	
 
     def Start(self):
 		self.enable = True
